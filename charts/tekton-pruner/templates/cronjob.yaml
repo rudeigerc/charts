@@ -1,0 +1,27 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "tekton-pruner.fullname" . }}
+  labels:
+    {{- include "tekton-pruner.labels" . | nindent 4 }}
+spec:
+  schedule: "{{ .Values.schedule }}"
+  concurrencyPolicy: {{ .Values.concurrencyPolicy | default "Forbid" }}
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          {{- with .Values.imagePullSecrets }}
+          imagePullSecrets:
+            {{- toYaml . | nindent 8 }}
+          {{- end }}
+          restartPolicy: "{{ .Values.restartPolicy | default "OnFailure" }}"
+          serviceAccountName: {{ include "tekton-pruner.fullname" . }}
+          containers:
+            - name: tkn
+              image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+              imagePullPolicy: {{ .Values.image.pullPolicy | default "IfNotPresent"}}
+              command:
+                - /bin/sh
+                - -c
+                - tkn pr delete --all --keep {{ .Values.keep }}

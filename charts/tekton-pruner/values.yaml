@@ -1,0 +1,11 @@
+image:
+  repository: gcr.m.daocloud.io/tekton-releases/dogfooding/tkn
+  tag: latest
+  pullPolicy: IfNotPresent
+
+schedule: "*/15 * * * *"
+concurrencyPolicy: Forbid
+restartPolicy: OnFailure
+keep: 5
+
+imagePullSecrets: []
